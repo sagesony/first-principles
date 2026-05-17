@@ -69,6 +69,7 @@ let clarityScore = 0;
 let thinkingInterval = null;
 let thinkingIdx = 0;
 let exchangeCount = 0;
+let sessionId = "";
 
 // DOM
 const homeEl = document.getElementById("home");
@@ -160,7 +161,7 @@ async function callAPI(apiMessages) {
   const res = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages: apiMessages, system: SYSTEM_PROMPT })
+    body: JSON.stringify({ messages: apiMessages, system: SYSTEM_PROMPT, concept, sessionId })
   });
   const data = await res.json();
   return data.content?.find(b => b.type === "text")?.text || "Interesting. What do you mean by that?";
@@ -171,6 +172,7 @@ async function startDialogue(c) {
   messages = [];
   clarityScore = 0;
   exchangeCount = 0;
+  sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   homeEl.style.display = "none";
   dialogueEl.style.display = "block";
   conceptTitle.textContent = concept;
