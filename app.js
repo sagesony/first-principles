@@ -1,12 +1,7 @@
 const CONCEPTS = [
-  "Compounding", "Leverage", "Incentives", "Opportunity Cost",
-  "Network Effects", "Moats", "First Principles", "Luck vs Skill",
-  "Optionality", "Momentum", "Attention", "Risk",
-  "Gravity", "Entropy", "Electricity", "Magnetism",
-  "Surface Tension", "Pressure", "Evolution", "Inertia",
-  "Infinity", "Probability", "Exponential Growth",
-  "Negative Numbers", "Zero", "Pi", "Fractions",
-  "Time", "Energy", "Fairness"
+  "Happiness", "Money", "Inflation", "Stock Market",
+  "Blockchain", "Artificial Intelligence", "Electricity", "Climate Change",
+  "Evolution", "Sleep", "Memory", "Stress", "Theory of Relativity"
 ];
 
 const THINKING = [
