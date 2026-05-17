@@ -1,10 +1,12 @@
 const CONCEPTS = [
-  "Money", "Time", "Happiness", "Success", "Love", "Power", "Freedom",
-  "Trust", "Intelligence", "Luck", "Fairness", "Risk",
-  "Motivation", "Identity", "Value", "Creativity", "Discipline", "Fear",
-  "Compounding", "Valuation", "Diversification", "Bull Market",
-  "Muscle Gain", "Fat Loss", "Recovery", "Consistency",
-  "Job Satisfaction", "Burnout", "Purpose"
+  "Compounding", "Leverage", "Incentives", "Opportunity Cost",
+  "Network Effects", "Moats", "First Principles", "Luck vs Skill",
+  "Optionality", "Momentum", "Attention", "Risk",
+  "Gravity", "Entropy", "Electricity", "Magnetism",
+  "Surface Tension", "Pressure", "Evolution", "Inertia",
+  "Infinity", "Probability", "Exponential Growth",
+  "Negative Numbers", "Zero", "Pi", "Fractions",
+  "Time", "Energy", "Fairness"
 ];
 
 const THINKING = [

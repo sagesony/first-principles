@@ -10,7 +10,8 @@
     #root { max-width: 520px; margin: 0 auto; padding: 2rem 1rem; }
 
     h1 { font-size: 22px; font-weight: 500; line-height: 1.35; margin-bottom: 0.4rem; }
-    .subtitle { font-size: 14px; color: #666; margin-bottom: 1.75rem; line-height: 1.6; }
+    .subtitle { font-size: 14px; color: #666; margin-bottom: 0.75rem; line-height: 1.6; }
+    .supporting-line { font-size: 13px; color: #aaa; margin-bottom: 1.75rem; line-height: 1.6; font-style: italic; }
     .label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.4rem; }
 
     input[type=text] { width: 100%; padding: 10px 13px; font-size: 15px; border: 1px solid #ddd; border-radius: 10px; outline: none; margin-bottom: 1rem; }
@@ -63,15 +64,16 @@
   <!-- Home Screen -->
   <div id="home">
     <p class="label">First Principles</p>
-    <h1>Understand any concept through questions & answers</h1>
-    <p class="subtitle">Pick a concept. Answer questions. Build real understanding.</p>
+    <h1>Learn by reasoning,<br>not memorizing</h1>
+    <p class="subtitle">Explore concepts through guided questions that help you build deep understanding from first principles.</p>
+    <p class="supporting-line">You won't just consume answers — you'll think your way to them.</p>
 
     <input type="text" id="concept-input" placeholder="Enter any concept..." />
 
     <p class="label">Or pick one</p>
     <div class="chips" id="chips"></div>
 
-    <button class="btn-primary" id="start-btn" disabled>Let's go →</button>
+    <button class="btn-primary" id="start-btn" disabled>Start exploring →</button>
   </div>
 
   <!-- Dialogue Screen -->
