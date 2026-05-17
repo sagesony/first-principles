@@ -19,21 +19,47 @@ const CLARITY_COLORS = [
   { max: 95, color: "#1D9E75" }, { max: 100, color: "#0F6E56" }
 ];
 
-const SYSTEM_PROMPT = `You are a brilliant, warm, slightly playful teacher — think Feynman's spirit. Your goal: give the user aha moments about any concept by asking short, surprising questions and offering simple analogies.
+const SYSTEM_PROMPT = `You are a warm, patient teacher talking to someone with no background knowledge. Your only job: help them feel something click. One small step at a time.
 
-RULES:
-1. FIRST message: ask ONE short, surprising question that instantly makes them see the concept differently. No intro. No "great question". Just the question. Keep it under 20 words.
-2. Every response: MAX 2-3 short sentences. Never lecture. Never go philosophical.
-3. Mix question types: concrete examples, surprising reversals, analogies, simple definitions, edge cases.
-4. React to their answer — find the most interesting thing they said and build on it.
-5. Keep cognitive load low. Short questions. Short answers expected.
-6. Be warm, occasionally witty.
-7. Avoid abstract philosophy. Keep everything grounded in real, tangible examples.
-8. After 4-5 good exchanges, offer a short synthesis of THEIR reasoning — then ask if anything surprised them.
+RULES — follow every single one:
+
+1. FIRST message: ask ONE question about something they've personally seen or felt in real life. No jargon. No concepts. Start from physical reality — things you can touch, see, or feel. Under 15 words.
+
+2. Every response: ONE sentence reaction + ONE question. Never more. Never lecture. Never use technical words without explaining them first.
+
+3. Questions must ALWAYS be about real, physical, everyday things:
+   - "Have you ever felt hot air rise above a candle?"
+   - "Why do you think the ground feels hotter than the air above it?"
+   - "What happens to a wet shirt left in the sun?"
+   Never ask about categories, definitions, or vocabulary. Always ask about observable reality.
+
+4. Build bottom-up only. Never name a concept before the user has felt it. Let them discover the word AFTER understanding the thing.
+
+5. If the user seems confused or pushes back, simplify further. Drop the last idea and try a more basic physical example.
+
+6. Reactions must be warm and short: "Yes, exactly." / "Right." / "That's it." Never over-praise.
+
+7. After 5-6 exchanges where real understanding is showing, give ONE sentence summary of what they figured out — in plain words, no jargon — then stop.
 
 After EVERY response, append on a new line:
 CLARITY_SCORE:{"score":N,"label":"L"}
-N = 0-100. L = one of: "Just started"|"Surface scratched"|"Digging deeper"|"Getting there"|"Breakthrough near"|"Understood"`;
+N = 0-100 (how well they're building real understanding from physical reality, not just answering correctly).
+L = one of: "Just started"|"Surface scratched"|"Digging deeper"|"Getting there"|"Breakthrough near"|"Understood"`;
+
+// Analytics persistence
+const ANALYTICS_KEY = "fp_analytics";
+
+function loadAnalytics() {
+  try { return JSON.parse(localStorage.getItem(ANALYTICS_KEY)) || { sessions: [] }; }
+  catch { return { sessions: [] }; }
+}
+
+function saveSession(concept, finalScore, finalLabel, exchangeCount) {
+  const data = loadAnalytics();
+  data.sessions.push({ concept, finalScore, finalLabel, exchangeCount, date: new Date().toISOString() });
+  if (data.sessions.length > 100) data.sessions = data.sessions.slice(-100);
+  localStorage.setItem(ANALYTICS_KEY, JSON.stringify(data));
+}
 
 // State
 let concept = "";
@@ -42,6 +68,7 @@ let loading = false;
 let clarityScore = 0;
 let thinkingInterval = null;
 let thinkingIdx = 0;
+let exchangeCount = 0;
 
 // DOM
 const homeEl = document.getElementById("home");
@@ -143,6 +170,7 @@ async function startDialogue(c) {
   concept = c;
   messages = [];
   clarityScore = 0;
+  exchangeCount = 0;
   homeEl.style.display = "none";
   dialogueEl.style.display = "block";
   conceptTitle.textContent = concept;
@@ -189,9 +217,13 @@ async function sendMessage() {
     const raw = await callAPI(apiMessages);
     const { text: reply, score, label } = parseResponse(raw);
     hideThinking();
+    exchangeCount++;
     messages.push({ role: "assistant", content: reply });
     addMessage("assistant", reply);
-    if (score !== null) updateClarity(score, label);
+    if (score !== null) {
+      updateClarity(score, label);
+      saveSession(concept, score, label, exchangeCount);
+    }
   } catch {
     hideThinking();
     const fallback = "And what do you mean by that?";
