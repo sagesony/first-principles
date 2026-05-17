@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>First Principles</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #fff; color: #111; min-height: 100vh; }
+    #root { max-width: 520px; margin: 0 auto; padding: 2rem 1rem; }
+
+    h1 { font-size: 22px; font-weight: 500; line-height: 1.35; margin-bottom: 0.4rem; }
+    .subtitle { font-size: 14px; color: #666; margin-bottom: 1.75rem; line-height: 1.6; }
+    .label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.4rem; }
+
+    input[type=text] { width: 100%; padding: 10px 13px; font-size: 15px; border: 1px solid #ddd; border-radius: 10px; outline: none; margin-bottom: 1rem; }
+    input[type=text]:focus { border-color: #111; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 1.5rem; }
+    .chip { font-size: 13px; padding: 5px 12px; border-radius: 999px; border: 1px solid #e0e0e0; background: #f5f5f5; color: #444; cursor: pointer; }
+    .chip:hover { background: #eee; }
+
+    .btn-primary { width: 100%; padding: 11px; font-size: 15px; font-weight: 500; border: none; border-radius: 10px; background: #111; color: #fff; cursor: pointer; }
+    .btn-primary:disabled { background: #e0e0e0; color: #aaa; cursor: not-allowed; }
+
+    /* Dialogue */
+    #dialogue { display: none; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.875rem; }
+    .concept-label { font-size: 14px; font-weight: 500; }
+    .concept-label span { font-weight: 400; color: #888; }
+    .restart-btn { font-size: 12px; color: #888; background: none; border: none; cursor: pointer; }
+
+    .clarity-bar-wrap { background: #f5f5f5; border-radius: 10px; padding: 9px 13px; margin-bottom: 1.25rem; }
+    .clarity-meta { display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-bottom: 5px; }
+    .clarity-score-label { font-weight: 500; }
+    .clarity-track { height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden; }
+    .clarity-fill { height: 100%; border-radius: 2px; transition: width 0.8s ease, background 0.8s ease; width: 0%; background: #E24B4A; }
+
+    .messages { padding-bottom: 0.5rem; }
+    .msg { display: flex; margin-bottom: 0.875rem; }
+    .msg.user { justify-content: flex-end; }
+    .bubble { max-width: 84%; padding: 9px 13px; font-size: 14px; line-height: 1.65; border-radius: 14px; }
+    .bubble.ai { background: #f5f5f5; color: #111; border-bottom-left-radius: 2px; }
+    .bubble.user { background: #111; color: #fff; border-bottom-right-radius: 2px; }
+
+    .thinking { display: flex; align-items: center; gap: 8px; margin-bottom: 0.875rem; }
+    .dots { display: flex; gap: 3px; }
+    .dot { width: 5px; height: 5px; border-radius: 50%; background: #bbb; animation: pulse 1.2s ease-in-out infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    .thinking-text { font-size: 12px; color: #999; font-style: italic; }
+    @keyframes pulse { 0%,100%{opacity:.3;transform:scale(.8)} 50%{opacity:1;transform:scale(1)} }
+
+    .input-row { position: sticky; bottom: 0; background: #fff; padding-top: 0.75rem; padding-bottom: 1rem; border-top: 1px solid #f0f0f0; display: flex; gap: 8px; }
+    .input-row input { flex: 1; padding: 9px 13px; font-size: 14px; border: 1px solid #ddd; border-radius: 10px; outline: none; }
+    .send-btn { padding: 9px 16px; font-size: 14px; border: none; border-radius: 10px; background: #111; color: #fff; cursor: pointer; }
+    .send-btn:disabled { background: #e0e0e0; color: #aaa; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+<div id="root">
+
+  <!-- Home Screen -->
+  <div id="home">
+    <p class="label">First Principles</p>
+    <h1>Understand any concept through questions & answers</h1>
+    <p class="subtitle">Pick a concept. Answer questions. Build real understanding.</p>
+
+    <input type="text" id="concept-input" placeholder="Enter any concept..." />
+
+    <p class="label">Or pick one</p>
+    <div class="chips" id="chips"></div>
+
+    <button class="btn-primary" id="start-btn" disabled>Let's go →</button>
+  </div>
+
+  <!-- Dialogue Screen -->
+  <div id="dialogue">
+    <div class="top-bar">
+      <p class="concept-label"><span>on </span><span id="concept-title"></span></p>
+      <button class="restart-btn" id="restart-btn">start over</button>
+    </div>
+
+    <div class="clarity-bar-wrap">
+      <div class="clarity-meta">
+        <span>Understanding</span>
+        <span class="clarity-score-label" id="clarity-label">Just started · 0%</span>
+      </div>
+      <div class="clarity-track"><div class="clarity-fill" id="clarity-fill"></div></div>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="input-row">
+      <input type="text" id="user-input" placeholder="Your answer..." />
+      <button class="send-btn" id="send-btn" disabled>→</button>
+    </div>
+  </div>
+
+</div>
+<script src="app.js"></script>
+</body>
+</html>
