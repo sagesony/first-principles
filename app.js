@@ -186,7 +186,12 @@ function parseResponse(raw) {
   catch { return { text, score: null, label: null }; }
 }
 
+function removeActionButtons() {
+  document.querySelectorAll(".action-btns").forEach(el => el.remove());
+}
+
 function addMessage(role, text) {
+  removeActionButtons();
   const div = document.createElement("div");
   div.className = `msg ${role}`;
   const bubble = document.createElement("div");
@@ -195,6 +200,73 @@ function addMessage(role, text) {
   div.appendChild(bubble);
   messagesEl.appendChild(div);
   messagesEl.scrollTop = messagesEl.scrollHeight;
+  return div;
+}
+
+function addActionMessage(label) {
+  removeActionButtons();
+  const div = document.createElement("div");
+  div.className = "msg action-msg";
+  const chip = document.createElement("span");
+  chip.className = "action-chip";
+  chip.textContent = label;
+  div.appendChild(chip);
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function addActionButtons() {
+  removeActionButtons();
+  const wrap = document.createElement("div");
+  wrap.className = "action-btns";
+  const actions = [
+    { label: "↻  Try differently", msg: "Try a completely different angle or scenario on this.", display: "↻ Try differently" },
+    { label: "↓  Simpler", msg: "That's too complex for me. Use a much simpler everyday example.", display: "↓ Simpler" },
+    { label: "↑  Go deeper", msg: "I already get this. Push further and challenge me more.", display: "↑ Go deeper" }
+  ];
+  actions.forEach(a => {
+    const btn = document.createElement("button");
+    btn.className = "action-btn";
+    btn.textContent = a.label;
+    btn.onclick = () => sendAction(a.msg, a.display);
+    wrap.appendChild(btn);
+  });
+  messagesEl.appendChild(wrap);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+async function sendAction(msg, display) {
+  if (loading) return;
+  addActionMessage(display);
+  messages.push({ role: "user", content: msg });
+  loading = true;
+  userInput.disabled = true;
+  sendBtn.disabled = true;
+  showThinking();
+  const apiMessages = [
+    { role: "user", content: `Concept: "${concept}". Open with your most surprising question.` },
+    ...messages.map(m => ({ role: m.role, content: m.content }))
+  ];
+  try {
+    const raw = await callAPI(apiMessages);
+    const { text: reply, score, label } = parseResponse(raw);
+    hideThinking();
+    exchangeCount++;
+    messages.push({ role: "assistant", content: reply });
+    addMessage("assistant", reply);
+    addActionButtons();
+    if (score !== null) { updateClarity(score, label); saveSession(concept, score, label, exchangeCount); }
+  } catch {
+    hideThinking();
+    const fallback = "Let me try a different way — what's one thing you do know about this?";
+    messages.push({ role: "assistant", content: fallback });
+    addMessage("assistant", fallback);
+    addActionButtons();
+  }
+  loading = false;
+  userInput.disabled = false;
+  sendBtn.disabled = !userInput.value.trim();
+  userInput.focus();
 }
 
 function showThinking() {
@@ -248,12 +320,14 @@ async function startDialogue(c) {
     hideThinking();
     messages.push({ role: "assistant", content: text });
     addMessage("assistant", text);
+    addActionButtons();
     if (score !== null) updateClarity(score, label);
   } catch {
     hideThinking();
     const fallback = `When was the last time ${concept} surprised you?`;
     messages.push({ role: "assistant", content: fallback });
     addMessage("assistant", fallback);
+    addActionButtons();
   }
   loading = false;
   userInput.disabled = false;
@@ -282,6 +356,7 @@ async function sendMessage() {
     exchangeCount++;
     messages.push({ role: "assistant", content: reply });
     addMessage("assistant", reply);
+    addActionButtons();
     if (score !== null) {
       updateClarity(score, label);
       saveSession(concept, score, label, exchangeCount);
@@ -291,6 +366,7 @@ async function sendMessage() {
     const fallback = "And what do you mean by that?";
     messages.push({ role: "assistant", content: fallback });
     addMessage("assistant", fallback);
+    addActionButtons();
   }
   loading = false;
   userInput.disabled = false;

@@ -55,6 +55,13 @@
     .thinking-text { font-size: 12px; color: #999; font-style: italic; }
     @keyframes pulse { 0%,100%{opacity:.3;transform:scale(.8)} 50%{opacity:1;transform:scale(1)} }
 
+    /* Action buttons */
+    .action-btns { display: flex; gap: 6px; margin-bottom: 0.875rem; padding-left: 2px; flex-wrap: wrap; }
+    .action-btn { font-size: 12px; padding: 4px 11px; border-radius: 999px; border: 1px solid #e0e0e0; background: #fff; color: #888; cursor: pointer; transition: all 0.15s; }
+    .action-btn:hover { background: #f5f5f5; color: #333; border-color: #bbb; }
+    .action-msg { justify-content: flex-end; margin-bottom: 0.875rem; }
+    .action-chip { font-size: 12px; padding: 4px 11px; border-radius: 999px; background: #f0f0f0; color: #666; font-style: italic; }
+
     .input-row { position: sticky; bottom: 0; background: #fff; padding-top: 0.75rem; padding-bottom: 1rem; border-top: 1px solid #f0f0f0; display: flex; gap: 8px; }
     .input-row input { flex: 1; padding: 9px 13px; font-size: 14px; border: 1px solid #ddd; border-radius: 10px; outline: none; }
     .send-btn { padding: 9px 16px; font-size: 14px; border: none; border-radius: 10px; background: #111; color: #fff; cursor: pointer; }
