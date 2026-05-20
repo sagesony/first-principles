@@ -35,6 +35,7 @@
     .concept-label span { font-weight: 400; color: #A09C96; }
     .restart-btn { font-size: 12px; color: #A09C96; background: none; border: none; cursor: pointer; }
     .restart-btn:hover { color: #1C1C1A; }
+    .mode-tag { font-size: 11px; font-weight: 400; color: #A09C96; background: #F0EDE8; border-radius: 999px; padding: 2px 8px; margin-left: 8px; vertical-align: middle; }
 
     .clarity-bar-wrap { background: #F0EDE8; border-radius: 10px; padding: 9px 13px; margin-bottom: 1.25rem; }
     .clarity-meta { display: flex; justify-content: space-between; font-size: 11px; color: #A09C96; margin-bottom: 5px; }
@@ -70,6 +71,15 @@
     .input-row input::placeholder { color: #B5B0A9; }
     .send-btn { padding: 11px 18px; font-size: 15px; border: none; border-radius: 12px; background: #1C1C1A; color: #FAF9F7; cursor: pointer; }
     .send-btn:disabled { background: #E5E1DA; color: #B5B0A9; cursor: not-allowed; }
+
+    /* ── Mode selector ── */
+    .mode-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 1.25rem; }
+    .mode-btn { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px 13px; border-radius: 10px; border: 1.5px solid #E5E1DA; background: #fff; cursor: pointer; transition: all 0.15s; text-align: left; }
+    .mode-btn:hover { border-color: #CCC8C2; background: #F7F4F0; }
+    .mode-btn.active { border-color: #1C1C1A; background: #F0EDE8; }
+    .mode-label { font-size: 13px; font-weight: 500; color: #1C1C1A; }
+    .mode-desc { font-size: 11px; color: #A09C96; line-height: 1.4; }
+    .mode-btn.active .mode-label { color: #1C1C1A; }
 
     /* ── Tablet (≥ 640px) ── */
     @media (min-width: 640px) {
@@ -115,7 +125,9 @@
 
     <div class="explore">
       <input type="text" id="concept-input" placeholder="Enter any concept..." />
-      <p class="label">Or pick one</p>
+      <p class="label">Questioning style</p>
+      <div class="mode-selector" id="mode-selector"></div>
+      <p class="label">Or pick a concept</p>
       <div class="chips" id="chips"></div>
       <button class="btn-primary" id="start-btn" disabled>Start exploring →</button>
     </div>
@@ -124,7 +136,7 @@
   <!-- Dialogue Screen -->
   <div id="dialogue">
     <div class="top-bar">
-      <p class="concept-label"><span>on </span><span id="concept-title"></span></p>
+      <p class="concept-label"><span>on </span><span id="concept-title"></span><span class="mode-tag" id="mode-tag"></span></p>
       <button class="restart-btn" id="restart-btn">start over</button>
     </div>
 

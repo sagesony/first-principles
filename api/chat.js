@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const { messages, system, concept, sessionId } = req.body;
+  const { messages, system, concept, sessionId, mode } = req.body;
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -49,7 +49,8 @@ export default async function handler(req, res) {
             "AI Reply": aiReply.slice(0, idx === -1 ? undefined : idx).trim(),
             "Clarity Score": clarityScore,
             "Clarity Label": clarityLabel || "",
-            "Session ID": sessionId || ""
+            "Session ID": sessionId || "",
+            "Mode": mode || ""
           }
         }]
       })
