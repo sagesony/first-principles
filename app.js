@@ -1,18 +1,18 @@
 const PROVOCATIONS = [
-  { short: "Does hard work actually matter?",  full: "Does hard work actually matter, or do we just need to believe it does?" },
-  { short: "Do you think for yourself?",        full: "Do you actually think for yourself, or do you mostly adopt the views of people you admire?" },
-  { short: "Do humans want freedom?",           full: "Do humans actually want freedom, or do we just want the feeling of it?" },
-  { short: "Is ambition just anxiety?",         full: "Is ambition admirable, or is it mostly anxiety with a productive mask?" },
-  { short: "Are your values really yours?",     full: "Are most of your values things you chose, or things you inherited without realising?" },
-  { short: "Does self-awareness help?",         full: "Does self-awareness make you better, or just better at rationalizing what you already do?" },
-  { short: "Is expertise overrated?",           full: "Is expertise overrated in a world that changes faster than experts can keep up?" },
-  { short: "Does democracy actually work?",     full: "Does democracy work, or do we defend it mostly because we lack a better alternative?" }
+  { short: "What actually compounds in life?",          full: "What actually compounds in life — and why do most people optimise for the wrong things?" },
+  { short: "Why do some products become habits?",       full: "Why do some products become habits while objectively better ones get ignored?" },
+  { short: "What makes people genuinely persuasive?",   full: "What actually makes people persuasive — and why is it rarely what they think it is?" },
+  { short: "Why do some people see opportunities first?", full: "Why do some people consistently notice opportunities earlier than everyone else?" },
+  { short: "What separates enduring companies from hype?", full: "What actually separates enduring companies from hype cycles?" },
+  { short: "Will AI make creativity richer or rarer?",  full: "Will AI genuinely increase human creativity, or quietly reduce it over time?" },
+  { short: "Why do some ideas spread, others die?",     full: "Why do some ideas spread rapidly while better ones die quietly?" },
+  { short: "What becomes rare in an abundant world?",   full: "What becomes genuinely rare and valuable in a world where information and execution are cheap?" }
 ];
 
 const THINKING = [
-  "Finding the weak point...", "Checking that logic...", "Preparing a counterexample...",
-  "Steelmanning your position...", "Identifying the assumption...", "Sharpening the question...",
-  "Looking for the contradiction..."
+  "Finding the interesting angle...", "Connecting the dots...", "Looking for the non-obvious...",
+  "Going one layer deeper...", "Finding what matters here...", "Surfacing the pattern...",
+  "Thinking this through..."
 ];
 
 const CLARITY_COLORS = [
@@ -22,60 +22,69 @@ const CLARITY_COLORS = [
 ];
 
 const STAGE_CONFIG = [
-  { id: "stance",     label: "Finding your position" },
-  { id: "pressure",   label: "Testing the logic" },
-  { id: "pivot",      label: "Challenging assumptions" },
-  { id: "resolution", label: "Reaching clarity" }
+  { id: "surface", label: "Getting underneath it" },
+  { id: "deepen",  label: "Going deeper" },
+  { id: "connect", label: "Connecting the dots" },
+  { id: "insight", label: "The insight" }
 ];
 
 const PROMPTS = {
-  "sparring": `You are an intellectual sparring partner — not a teacher, not a tutor, not a chatbot. Your job is to test ideas, expose weak reasoning, and help people think more precisely by challenging them directly.
+  "sparring": `You are a brilliant thinking partner — curious, well-read, and genuinely interested in helping people develop sharper, more original perspectives on ideas that matter.
+
+Your job is not to win arguments or catch people out. Your job is to help people see things they haven't seen before, make connections they haven't made, and leave feeling more capable and perceptive.
 
 PERSONA:
-- Brilliant, intellectually honest, respectful but never soft
-- You disagree precisely, not broadly
-- You never let weak logic pass, but you never condescend
-- You think like a great cross-examiner combined with a philosopher
+- Intellectually generous but precise
+- You think in systems, patterns, and non-obvious connections
+- You're genuinely excited by good ideas — that energy is contagious
+- You ask questions that open things up, not close them down
+- You find the most interesting angle on any topic, especially the one most people miss
 
 THE CONVERSATION HAS 4 STAGES — move through them in order:
 
-STAGE 1 — STANCE:
-- Identify and NAME the user's core claim explicitly
-- "The claim you're making is: [precise restatement]. Is that right?"
-- Find the implicit assumption underneath their stated position
-- Never start with agreement or praise
+STAGE 1 — SURFACE:
+- Find what's genuinely interesting or non-obvious about this topic
+- Ask one question that gets beneath the surface — something that reframes rather than interrogates
+- Make the user feel: "I haven't thought about it from that angle"
+- Never start with a challenge or pushback — start with curiosity
 
-STAGE 2 — PRESSURE:
-- Find the ONE weakest logical link in their position
-- Steel-man their view first: "The strongest version of your argument is..."
-- Then apply targeted pressure with one precise counterexample or question
-- Do NOT ask broad questions — ask surgical ones
+STAGE 2 — DEEPEN:
+- Take what they said and surface the non-obvious implication
+- "What's interesting about that is..." — find the layer underneath
+- Connect their thinking to a pattern or principle worth naming
+- Push gently for specificity: "Can you think of a concrete example?"
 
-STAGE 3 — PIVOT:
-- Present the strongest possible opposing view in 2 sentences
-- Look for contradictions with earlier statements: "Earlier you said X. You just said Y. Do those contradict?"
-- Ask once: "What would it take to change your mind?"
+STAGE 3 — CONNECT:
+- Find unexpected connections to adjacent ideas, domains, or mental models
+- Introduce a framework or lens that sharpens their thinking
+- Surface the tension worth sitting with: "Here's what makes this genuinely hard..."
+- This isn't about proving them wrong — it's about showing more of the territory
 
-STAGE 4 — RESOLUTION:
-- Name what shifted: "You came in believing X. You're now closer to Y."
-- Name what remains genuinely unresolved
-- End with ONE open question they should keep thinking about
-- Do NOT wrap up neatly — leave productive tension
+STAGE 4 — INSIGHT:
+- Help them synthesize what emerged in the conversation
+- Name the non-obvious insight: "What you've actually described is..."
+- Leave them with a new lens or question, not a tidy conclusion
+- The user should feel: more perceptive, more capable, mentally expanded
+
+TONE AND STYLE:
+- Warm, energising, intellectually alive — never cold or combative
+- Max 3 sentences + 1 question per response. Never lecture.
+- Never make someone feel wrong — make them feel like they're seeing more
+- Language to use: "What's interesting is...", "That connects to...", "Here's the non-obvious part...", "The pattern underneath this..."
+- Language to avoid: "Actually...", "But you're missing...", "That's not right", "Devil's advocate..."
+- If they give a surface answer, go one layer deeper without signalling disappointment
+- If they say something smart, build on it — don't just validate it
 
 STRICT RULES:
-- Maximum 3 sentences + 1 question per response. Never more.
-- Never agree without qualification
-- Never praise ("Great point!", "Exactly!", "Interesting!")
-- Never explain concepts unprompted — only respond to what they said
+- Max 3 sentences + 1 question per turn. No exceptions.
 - Never ask more than one question per turn
-- If they're vague: "Can you give me a specific example?"
-- If they're overconfident: find the edge case immediately
-- If they shift position too easily: "You moved fast — are you convinced, or just avoiding pressure?"
+- Never lecture or explain unprompted
+- If they're too abstract: "Can you make that concrete — a real example?"
 
 After EVERY response, append on a new line:
 STAGE:{"stage":"S","label":"L"}
-S = one of: "stance"|"pressure"|"pivot"|"resolution"
-L = one of: "Finding your position"|"Testing the logic"|"Challenging assumptions"|"Reaching clarity"`,
+S = one of: "surface"|"deepen"|"connect"|"insight"
+L = one of: "Getting underneath it"|"Going deeper"|"Connecting the dots"|"The insight"`,
 
   "personal-memory": `You are a warm, patient teacher talking to someone with no background knowledge. Your only job: help them feel something click. One small step at a time.
 
@@ -267,7 +276,7 @@ const clarityBarEl  = document.getElementById("clarity-bar");
 
 // Build mode selector
 const MODE_OPTIONS = [
-  { id: "sparring",        label: "Intellectual Sparring", desc: "Challenge assumptions · defend positions" },
+  { id: "sparring",        label: "Deep Exploration",      desc: "Surface non-obvious insights · go deeper" },
   { id: "personal-memory", label: "Personal Memory",       desc: "Anchor in your own experiences" },
   { id: "analogy-first",   label: "Analogy First",         desc: "Map to something you already know" },
   { id: "prediction",      label: "Prediction",            desc: "Guess what happens, then find out" },
@@ -411,9 +420,9 @@ function addActionButtons() {
   const wrap    = document.createElement("div");
   wrap.className = "action-btns";
   const actions  = selectedMode === "sparring" ? [
-    { label: "⚔ Push harder",     msg: "That wasn't challenging enough. Push harder — find the weakest part of my argument and attack it directly.",  display: "⚔ Push harder" },
-    { label: "◈ Steel man me",    msg: "Before you challenge me, give me the strongest possible version of my own position.",                          display: "◈ Steel man me" },
-    { label: "↻ Different angle", msg: "Try a completely different angle — a counterexample or scenario I haven't considered.",                        display: "↻ Different angle" }
+    { label: "→ Go deeper",        msg: "Go one layer deeper on this — what's the non-obvious thing underneath?",                                       display: "→ Go deeper" },
+    { label: "⬡ Connect the dots", msg: "What does this connect to in a broader context — another domain, pattern, or idea?",                          display: "⬡ Connect the dots" },
+    { label: "↗ Make it practical",msg: "How does this actually apply? What would someone do differently knowing this?",                               display: "↗ Make it practical" }
   ] : [
     { label: "↻ Try differently", msg: "Try a completely different angle or scenario on this.",           display: "↻ Try differently" },
     { label: "↓ Simpler",         msg: "That's too complex for me. Use a much simpler everyday example.", display: "↓ Simpler" },
@@ -433,7 +442,7 @@ function addActionButtons() {
 // ── API message builder ──
 function buildApiMessages() {
   const opener = selectedMode === "sparring"
-    ? `The user wants to spar about: "${concept}". Begin Stage 1 — identify the core claim implicit in this topic, then open with one sharp direct question to surface their actual position. No warm-up.`
+    ? `The user wants to explore: "${concept}". Begin Stage 1 (Surface) — find the most interesting angle on this topic and open with one question that gets beneath the surface. Warm, curious, concise. STAGE should be "surface".`
     : `Concept: "${concept}". Open with your most surprising, short question.`;
   return [
     { role: "user", content: opener },
@@ -495,7 +504,7 @@ async function sendAction(msg, display) {
   } catch {
     hideThinking();
     const fallback = selectedMode === "sparring"
-      ? "Let me find a different pressure point — what's the strongest reason you believe that?"
+      ? "Let me try a different angle — what's the most interesting part of this to you?"
       : "Let me try a different way — what's one thing you're confident about here?";
     messages.push({ role: "assistant", content: fallback });
     addMessage("assistant", fallback);
@@ -512,7 +521,7 @@ async function startDialogue(c) {
   concept       = c;
   messages      = [];
   clarityScore  = 0;
-  currentStage  = "stance";
+  currentStage  = "surface";
   exchangeCount = 0;
   sessionId     = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
@@ -523,7 +532,7 @@ async function startDialogue(c) {
   messagesEl.innerHTML      = "";
 
   showProgressBars();
-  if (selectedMode === "sparring") updateStage("stance", "Finding your position");
+  if (selectedMode === "sparring") updateStage("surface", "Getting underneath it");
   else updateClarity(0, "Just started");
 
   loading = true;
@@ -532,7 +541,7 @@ async function startDialogue(c) {
   showThinking();
 
   const opener = selectedMode === "sparring"
-    ? `The user wants to spar about: "${c}". Begin Stage 1 — name the core claim implicit in this topic, then open with one sharp direct question to find their actual position. Be direct. No warm-up. STAGE should be "stance".`
+    ? `The user wants to explore: "${c}". Begin Stage 1 (Surface) — find the most interesting or non-obvious angle on this topic. Open with one warm, curious question that gets beneath the surface. Make them feel: "I haven't thought about it that way." STAGE should be "surface".`
     : `Concept: "${c}". Open with your most surprising, short question. CLARITY_SCORE should be 0.`;
 
   try {
@@ -547,7 +556,7 @@ async function startDialogue(c) {
   } catch {
     hideThinking();
     const fallback = selectedMode === "sparring"
-      ? `Let's cut to it — what do you actually believe about this: "${c}"?`
+      ? `What draws you to this question: "${c}"?`
       : `When was the last time ${c} surprised you?`;
     messages.push({ role: "assistant", content: fallback });
     addMessage("assistant", fallback);
@@ -583,7 +592,7 @@ async function sendMessage() {
   } catch {
     hideThinking();
     const fallback = selectedMode === "sparring"
-      ? "Say more — what's the strongest reason you believe that?"
+      ? "What's the most interesting part of this to you?"
       : "And what do you mean by that?";
     messages.push({ role: "assistant", content: fallback });
     addMessage("assistant", fallback);
