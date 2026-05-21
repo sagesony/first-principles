@@ -1,13 +1,18 @@
-const CONCEPTS = [
-  "Happiness", "Money", "Inflation", "Stock Market",
-  "Blockchain", "Artificial Intelligence", "Electricity", "Climate Change",
-  "Evolution", "Sleep", "Memory", "Stress", "Theory of Relativity"
+const PROVOCATIONS = [
+  { short: "Does hard work actually matter?",  full: "Does hard work actually matter, or do we just need to believe it does?" },
+  { short: "Do you think for yourself?",        full: "Do you actually think for yourself, or do you mostly adopt the views of people you admire?" },
+  { short: "Do humans want freedom?",           full: "Do humans actually want freedom, or do we just want the feeling of it?" },
+  { short: "Is ambition just anxiety?",         full: "Is ambition admirable, or is it mostly anxiety with a productive mask?" },
+  { short: "Are your values really yours?",     full: "Are most of your values things you chose, or things you inherited without realising?" },
+  { short: "Does self-awareness help?",         full: "Does self-awareness make you better, or just better at rationalizing what you already do?" },
+  { short: "Is expertise overrated?",           full: "Is expertise overrated in a world that changes faster than experts can keep up?" },
+  { short: "Does democracy actually work?",     full: "Does democracy work, or do we defend it mostly because we lack a better alternative?" }
 ];
 
 const THINKING = [
-  "Finding a better angle...", "Looking for the simple truth...",
-  "Cutting through the noise...", "Checking that assumption...",
-  "Finding a good analogy...", "Simplifying...", "Connecting the dots..."
+  "Finding the weak point...", "Checking that logic...", "Preparing a counterexample...",
+  "Steelmanning your position...", "Identifying the assumption...", "Sharpening the question...",
+  "Looking for the contradiction..."
 ];
 
 const CLARITY_COLORS = [
@@ -16,7 +21,62 @@ const CLARITY_COLORS = [
   { max: 95, color: "#1D9E75" }, { max: 100, color: "#0F6E56" }
 ];
 
+const STAGE_CONFIG = [
+  { id: "stance",     label: "Finding your position" },
+  { id: "pressure",   label: "Testing the logic" },
+  { id: "pivot",      label: "Challenging assumptions" },
+  { id: "resolution", label: "Reaching clarity" }
+];
+
 const PROMPTS = {
+  "sparring": `You are an intellectual sparring partner — not a teacher, not a tutor, not a chatbot. Your job is to test ideas, expose weak reasoning, and help people think more precisely by challenging them directly.
+
+PERSONA:
+- Brilliant, intellectually honest, respectful but never soft
+- You disagree precisely, not broadly
+- You never let weak logic pass, but you never condescend
+- You think like a great cross-examiner combined with a philosopher
+
+THE CONVERSATION HAS 4 STAGES — move through them in order:
+
+STAGE 1 — STANCE:
+- Identify and NAME the user's core claim explicitly
+- "The claim you're making is: [precise restatement]. Is that right?"
+- Find the implicit assumption underneath their stated position
+- Never start with agreement or praise
+
+STAGE 2 — PRESSURE:
+- Find the ONE weakest logical link in their position
+- Steel-man their view first: "The strongest version of your argument is..."
+- Then apply targeted pressure with one precise counterexample or question
+- Do NOT ask broad questions — ask surgical ones
+
+STAGE 3 — PIVOT:
+- Present the strongest possible opposing view in 2 sentences
+- Look for contradictions with earlier statements: "Earlier you said X. You just said Y. Do those contradict?"
+- Ask once: "What would it take to change your mind?"
+
+STAGE 4 — RESOLUTION:
+- Name what shifted: "You came in believing X. You're now closer to Y."
+- Name what remains genuinely unresolved
+- End with ONE open question they should keep thinking about
+- Do NOT wrap up neatly — leave productive tension
+
+STRICT RULES:
+- Maximum 3 sentences + 1 question per response. Never more.
+- Never agree without qualification
+- Never praise ("Great point!", "Exactly!", "Interesting!")
+- Never explain concepts unprompted — only respond to what they said
+- Never ask more than one question per turn
+- If they're vague: "Can you give me a specific example?"
+- If they're overconfident: find the edge case immediately
+- If they shift position too easily: "You moved fast — are you convinced, or just avoiding pressure?"
+
+After EVERY response, append on a new line:
+STAGE:{"stage":"S","label":"L"}
+S = one of: "stance"|"pressure"|"pivot"|"resolution"
+L = one of: "Finding your position"|"Testing the logic"|"Challenging assumptions"|"Reaching clarity"`,
+
   "personal-memory": `You are a warm, patient teacher talking to someone with no background knowledge. Your only job: help them feel something click. One small step at a time.
 
 RULES — follow every single one:
@@ -161,7 +221,7 @@ N = 0-100 (how solidly each layer is placed before the next — penalise gaps an
 L = one of: "Just started"|"Surface scratched"|"Digging deeper"|"Getting there"|"Breakthrough near"|"Understood"`
 };
 
-// Analytics persistence
+// Analytics
 const ANALYTICS_KEY = "fp_analytics";
 
 function loadAnalytics() {
@@ -178,7 +238,8 @@ function saveSession(concept, finalScore, finalLabel, exchangeCount) {
 
 // State
 let concept = "";
-let selectedMode = "personal-memory";
+let selectedMode = "sparring";
+let currentStage = "stance";
 let messages = [];
 let loading = false;
 let clarityScore = 0;
@@ -188,26 +249,29 @@ let exchangeCount = 0;
 let sessionId = "";
 
 // DOM
-const homeEl = document.getElementById("home");
-const dialogueEl = document.getElementById("dialogue");
-const conceptInput = document.getElementById("concept-input");
-const startBtn = document.getElementById("start-btn");
-const chipsEl = document.getElementById("chips");
-const conceptTitle = document.getElementById("concept-title");
-const restartBtn = document.getElementById("restart-btn");
-const messagesEl = document.getElementById("messages");
-const userInput = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
-const clarityFill = document.getElementById("clarity-fill");
-const clarityLabelEl = document.getElementById("clarity-label");
-const modeTagEl = document.getElementById("mode-tag");
+const homeEl        = document.getElementById("home");
+const dialogueEl    = document.getElementById("dialogue");
+const conceptInput  = document.getElementById("concept-input");
+const startBtn      = document.getElementById("start-btn");
+const provocationsEl= document.getElementById("provocations");
+const conceptTitle  = document.getElementById("concept-title");
+const restartBtn    = document.getElementById("restart-btn");
+const messagesEl    = document.getElementById("messages");
+const userInput     = document.getElementById("user-input");
+const sendBtn       = document.getElementById("send-btn");
+const clarityFill   = document.getElementById("clarity-fill");
+const clarityLabelEl= document.getElementById("clarity-label");
+const modeTagEl     = document.getElementById("mode-tag");
+const stageBarEl    = document.getElementById("stage-bar");
+const clarityBarEl  = document.getElementById("clarity-bar");
 
 // Build mode selector
 const MODE_OPTIONS = [
-  { id: "personal-memory", label: "Personal Memory", desc: "Anchor in your own experiences" },
-  { id: "analogy-first",   label: "Analogy First",   desc: "Map to something you already know" },
-  { id: "prediction",      label: "Prediction",      desc: "Guess what happens, then find out" },
-  { id: "break-it-down",   label: "Break It Down",   desc: "Build up from the smallest unit" }
+  { id: "sparring",        label: "Intellectual Sparring", desc: "Challenge assumptions · defend positions" },
+  { id: "personal-memory", label: "Personal Memory",       desc: "Anchor in your own experiences" },
+  { id: "analogy-first",   label: "Analogy First",         desc: "Map to something you already know" },
+  { id: "prediction",      label: "Prediction",            desc: "Guess what happens, then find out" },
+  { id: "break-it-down",   label: "Break It Down",         desc: "Build from the smallest unit" }
 ];
 const modeSelector = document.getElementById("mode-selector");
 MODE_OPTIONS.forEach(opt => {
@@ -223,15 +287,20 @@ MODE_OPTIONS.forEach(opt => {
   modeSelector.appendChild(btn);
 });
 
-// Build chips
-CONCEPTS.forEach(c => {
+// Build provocations
+PROVOCATIONS.forEach(p => {
   const btn = document.createElement("button");
-  btn.className = "chip";
-  btn.textContent = c;
-  btn.onclick = () => { conceptInput.value = c; startDialogue(c); };
-  chipsEl.appendChild(btn);
+  btn.className = "provocation-btn";
+  btn.textContent = p.short;
+  btn.onclick = () => {
+    conceptInput.value = p.full;
+    startBtn.disabled = false;
+    conceptInput.focus();
+  };
+  provocationsEl.appendChild(btn);
 });
 
+// Input / button wiring
 conceptInput.addEventListener("input", () => {
   startBtn.disabled = !conceptInput.value.trim();
 });
@@ -244,6 +313,7 @@ sendBtn.onclick = sendMessage;
 userInput.addEventListener("input", () => { sendBtn.disabled = !userInput.value.trim() || loading; });
 userInput.addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
 
+// ── Clarity helpers ──
 function getColor(score) {
   return (CLARITY_COLORS.find(c => score <= c.max) || CLARITY_COLORS[5]).color;
 }
@@ -256,23 +326,66 @@ function updateClarity(score, label) {
   clarityLabelEl.textContent = `${label} · ${score}%`;
 }
 
-function parseResponse(raw) {
-  const idx = raw.indexOf("CLARITY_SCORE:");
-  if (idx === -1) return { text: raw.trim(), score: null, label: null };
-  const text = raw.slice(0, idx).trim();
-  try { const j = JSON.parse(raw.slice(idx + 14).trim()); return { text, score: j.score, label: j.label }; }
-  catch { return { text, score: null, label: null }; }
+// ── Stage helpers ──
+function updateStage(stage, label) {
+  currentStage = stage;
+  const stageIdx = STAGE_CONFIG.findIndex(s => s.id === stage);
+  const dots  = document.querySelectorAll(".stage-dot");
+  const steps = document.querySelectorAll(".stage-step");
+  dots.forEach((dot, i) => {
+    dot.classList.toggle("active",  i < stageIdx);
+    dot.classList.toggle("current", i === stageIdx);
+  });
+  steps.forEach((step, i) => step.classList.toggle("is-current", i === stageIdx));
+  const labelEl = document.getElementById("stage-label");
+  if (labelEl) labelEl.textContent = label || STAGE_CONFIG[stageIdx]?.label || "";
 }
 
+function showProgressBars() {
+  const sparring = selectedMode === "sparring";
+  stageBarEl.style.display   = sparring ? "block" : "none";
+  clarityBarEl.style.display = sparring ? "none"  : "block";
+}
+
+// ── Response parsing ──
+function parseResponse(raw) {
+  const stageIdx   = raw.indexOf("STAGE:");
+  const clarityIdx = raw.indexOf("CLARITY_SCORE:");
+  const firstTag   = Math.min(
+    stageIdx   === -1 ? Infinity : stageIdx,
+    clarityIdx === -1 ? Infinity : clarityIdx
+  );
+  const text = firstTag === Infinity ? raw.trim() : raw.slice(0, firstTag).trim();
+
+  let score = null, label = null, stage = null, stageLabel = null;
+
+  if (clarityIdx !== -1) {
+    try {
+      const j = JSON.parse(raw.slice(clarityIdx + 14).trim());
+      score = j.score; label = j.label;
+    } catch {}
+  }
+  if (stageIdx !== -1) {
+    try {
+      const rest = raw.slice(stageIdx + 6).trim();
+      const end  = rest.indexOf("\n");
+      const j    = JSON.parse(end === -1 ? rest : rest.slice(0, end));
+      stage = j.stage; stageLabel = j.label;
+    } catch {}
+  }
+  return { text, score, label, stage, stageLabel };
+}
+
+// ── Message rendering ──
 function removeActionButtons() {
   document.querySelectorAll(".action-btns").forEach(el => el.remove());
 }
 
 function addMessage(role, text) {
   removeActionButtons();
-  const div = document.createElement("div");
+  const div    = document.createElement("div");
   div.className = `msg ${role}`;
-  const bubble = document.createElement("div");
+  const bubble  = document.createElement("div");
   bubble.className = `bubble ${role === "user" ? "user" : "ai"}`;
   bubble.textContent = text;
   div.appendChild(bubble);
@@ -283,10 +396,10 @@ function addMessage(role, text) {
 
 function addActionMessage(label) {
   removeActionButtons();
-  const div = document.createElement("div");
+  const div  = document.createElement("div");
   div.className = "msg action-msg";
   const chip = document.createElement("span");
-  chip.className = "action-chip";
+  chip.className  = "action-chip";
   chip.textContent = label;
   div.appendChild(chip);
   messagesEl.appendChild(div);
@@ -295,16 +408,20 @@ function addActionMessage(label) {
 
 function addActionButtons() {
   removeActionButtons();
-  const wrap = document.createElement("div");
+  const wrap    = document.createElement("div");
   wrap.className = "action-btns";
-  const actions = [
-    { label: "↻  Try differently", msg: "Try a completely different angle or scenario on this.", display: "↻ Try differently" },
-    { label: "↓  Simpler", msg: "That's too complex for me. Use a much simpler everyday example.", display: "↓ Simpler" },
-    { label: "↑  Go deeper", msg: "I already get this. Push further and challenge me more.", display: "↑ Go deeper" }
+  const actions  = selectedMode === "sparring" ? [
+    { label: "⚔ Push harder",     msg: "That wasn't challenging enough. Push harder — find the weakest part of my argument and attack it directly.",  display: "⚔ Push harder" },
+    { label: "◈ Steel man me",    msg: "Before you challenge me, give me the strongest possible version of my own position.",                          display: "◈ Steel man me" },
+    { label: "↻ Different angle", msg: "Try a completely different angle — a counterexample or scenario I haven't considered.",                        display: "↻ Different angle" }
+  ] : [
+    { label: "↻ Try differently", msg: "Try a completely different angle or scenario on this.",           display: "↻ Try differently" },
+    { label: "↓ Simpler",         msg: "That's too complex for me. Use a much simpler everyday example.", display: "↓ Simpler" },
+    { label: "↑ Go deeper",       msg: "I already get this. Push further and challenge me more.",         display: "↑ Go deeper" }
   ];
   actions.forEach(a => {
     const btn = document.createElement("button");
-    btn.className = "action-btn";
+    btn.className   = "action-btn";
     btn.textContent = a.label;
     btn.onclick = () => sendAction(a.msg, a.display);
     wrap.appendChild(btn);
@@ -313,40 +430,18 @@ function addActionButtons() {
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-async function sendAction(msg, display) {
-  if (loading) return;
-  addActionMessage(display);
-  messages.push({ role: "user", content: msg });
-  loading = true;
-  userInput.disabled = true;
-  sendBtn.disabled = true;
-  showThinking();
-  const apiMessages = [
-    { role: "user", content: `Concept: "${concept}". Open with your most surprising question.` },
+// ── API message builder ──
+function buildApiMessages() {
+  const opener = selectedMode === "sparring"
+    ? `The user wants to spar about: "${concept}". Begin Stage 1 — identify the core claim implicit in this topic, then open with one sharp direct question to surface their actual position. No warm-up.`
+    : `Concept: "${concept}". Open with your most surprising, short question.`;
+  return [
+    { role: "user", content: opener },
     ...messages.map(m => ({ role: m.role, content: m.content }))
   ];
-  try {
-    const raw = await callAPI(apiMessages);
-    const { text: reply, score, label } = parseResponse(raw);
-    hideThinking();
-    exchangeCount++;
-    messages.push({ role: "assistant", content: reply });
-    addMessage("assistant", reply);
-    addActionButtons();
-    if (score !== null) { updateClarity(score, label); saveSession(concept, score, label, exchangeCount); }
-  } catch {
-    hideThinking();
-    const fallback = "Let me try a different way — what's one thing you do know about this?";
-    messages.push({ role: "assistant", content: fallback });
-    addMessage("assistant", fallback);
-    addActionButtons();
-  }
-  loading = false;
-  userInput.disabled = false;
-  sendBtn.disabled = !userInput.value.trim();
-  userInput.focus();
 }
 
+// ── Thinking indicator ──
 function showThinking() {
   const div = document.createElement("div");
   div.className = "thinking";
@@ -367,6 +462,7 @@ function hideThinking() {
   if (el) el.remove();
 }
 
+// ── API call ──
 async function callAPI(apiMessages) {
   const res = await fetch("/api/chat", {
     method: "POST",
@@ -374,91 +470,138 @@ async function callAPI(apiMessages) {
     body: JSON.stringify({ messages: apiMessages, system: PROMPTS[selectedMode], concept, sessionId, mode: selectedMode })
   });
   const data = await res.json();
-  return data.content?.find(b => b.type === "text")?.text || "Interesting. What do you mean by that?";
+  return data.content?.find(b => b.type === "text")?.text || "Say more — what do you mean by that?";
 }
 
-async function startDialogue(c) {
-  concept = c;
-  messages = [];
-  clarityScore = 0;
-  exchangeCount = 0;
-  sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  homeEl.style.display = "none";
-  dialogueEl.style.display = "block";
-  conceptTitle.textContent = concept;
-  modeTagEl.textContent = MODE_OPTIONS.find(m => m.id === selectedMode)?.label || "";
-  messagesEl.innerHTML = "";
-  updateClarity(0, "Just started");
+// ── Action button handler ──
+async function sendAction(msg, display) {
+  if (loading) return;
+  addActionMessage(display);
+  messages.push({ role: "user", content: msg });
   loading = true;
   userInput.disabled = true;
-  sendBtn.disabled = true;
+  sendBtn.disabled   = true;
   showThinking();
   try {
-    const raw = await callAPI([{ role: "user", content: `Concept: "${concept}". Open with your most surprising, short question. CLARITY_SCORE should be 0.` }]);
-    const { text, score, label } = parseResponse(raw);
+    const raw = await callAPI(buildApiMessages());
+    const { text: reply, score, label, stage, stageLabel } = parseResponse(raw);
     hideThinking();
-    messages.push({ role: "assistant", content: text });
-    addMessage("assistant", text);
+    exchangeCount++;
+    messages.push({ role: "assistant", content: reply });
+    addMessage("assistant", reply);
     addActionButtons();
-    if (score !== null) updateClarity(score, label);
+    if (stage) updateStage(stage, stageLabel);
+    else if (score !== null) { updateClarity(score, label); saveSession(concept, score, label, exchangeCount); }
   } catch {
     hideThinking();
-    const fallback = `When was the last time ${concept} surprised you?`;
+    const fallback = selectedMode === "sparring"
+      ? "Let me find a different pressure point — what's the strongest reason you believe that?"
+      : "Let me try a different way — what's one thing you're confident about here?";
     messages.push({ role: "assistant", content: fallback });
     addMessage("assistant", fallback);
     addActionButtons();
   }
   loading = false;
   userInput.disabled = false;
-  sendBtn.disabled = true;
+  sendBtn.disabled   = !userInput.value.trim();
+  userInput.focus();
+}
+
+// ── Start session ──
+async function startDialogue(c) {
+  concept       = c;
+  messages      = [];
+  clarityScore  = 0;
+  currentStage  = "stance";
+  exchangeCount = 0;
+  sessionId     = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+  homeEl.style.display      = "none";
+  dialogueEl.style.display  = "block";
+  conceptTitle.textContent  = c.length > 60 ? c.slice(0, 57) + "..." : c;
+  modeTagEl.textContent     = MODE_OPTIONS.find(m => m.id === selectedMode)?.label || "";
+  messagesEl.innerHTML      = "";
+
+  showProgressBars();
+  if (selectedMode === "sparring") updateStage("stance", "Finding your position");
+  else updateClarity(0, "Just started");
+
+  loading = true;
+  userInput.disabled = true;
+  sendBtn.disabled   = true;
+  showThinking();
+
+  const opener = selectedMode === "sparring"
+    ? `The user wants to spar about: "${c}". Begin Stage 1 — name the core claim implicit in this topic, then open with one sharp direct question to find their actual position. Be direct. No warm-up. STAGE should be "stance".`
+    : `Concept: "${c}". Open with your most surprising, short question. CLARITY_SCORE should be 0.`;
+
+  try {
+    const raw = await callAPI([{ role: "user", content: opener }]);
+    const { text, score, label, stage, stageLabel } = parseResponse(raw);
+    hideThinking();
+    messages.push({ role: "assistant", content: text });
+    addMessage("assistant", text);
+    addActionButtons();
+    if (stage) updateStage(stage, stageLabel);
+    else if (score !== null) updateClarity(score, label);
+  } catch {
+    hideThinking();
+    const fallback = selectedMode === "sparring"
+      ? `Let's cut to it — what do you actually believe about this: "${c}"?`
+      : `When was the last time ${c} surprised you?`;
+    messages.push({ role: "assistant", content: fallback });
+    addMessage("assistant", fallback);
+    addActionButtons();
+  }
+  loading = false;
+  userInput.disabled = false;
+  sendBtn.disabled   = true;
   setTimeout(() => userInput.focus(), 100);
 }
 
+// ── Send message ──
 async function sendMessage() {
   if (!userInput.value.trim() || loading) return;
   const text = userInput.value.trim();
-  userInput.value = "";
+  userInput.value  = "";
   sendBtn.disabled = true;
   messages.push({ role: "user", content: text });
   addMessage("user", text);
   loading = true;
   userInput.disabled = true;
   showThinking();
-  const apiMessages = [
-    { role: "user", content: `Concept: "${concept}". Open with your most surprising question.` },
-    ...messages.map(m => ({ role: m.role, content: m.content }))
-  ];
   try {
-    const raw = await callAPI(apiMessages);
-    const { text: reply, score, label } = parseResponse(raw);
+    const raw = await callAPI(buildApiMessages());
+    const { text: reply, score, label, stage, stageLabel } = parseResponse(raw);
     hideThinking();
     exchangeCount++;
     messages.push({ role: "assistant", content: reply });
     addMessage("assistant", reply);
     addActionButtons();
-    if (score !== null) {
-      updateClarity(score, label);
-      saveSession(concept, score, label, exchangeCount);
-    }
+    if (stage) updateStage(stage, stageLabel);
+    else if (score !== null) { updateClarity(score, label); saveSession(concept, score, label, exchangeCount); }
   } catch {
     hideThinking();
-    const fallback = "And what do you mean by that?";
+    const fallback = selectedMode === "sparring"
+      ? "Say more — what's the strongest reason you believe that?"
+      : "And what do you mean by that?";
     messages.push({ role: "assistant", content: fallback });
     addMessage("assistant", fallback);
     addActionButtons();
   }
   loading = false;
   userInput.disabled = false;
-  sendBtn.disabled = !userInput.value.trim();
+  sendBtn.disabled   = !userInput.value.trim();
   userInput.focus();
 }
 
+// ── Reset ──
 function reset() {
-  homeEl.style.display = "block";
+  homeEl.style.display     = "block";
   dialogueEl.style.display = "none";
   concept = "";
   messages = [];
   conceptInput.value = "";
-  startBtn.disabled = true;
+  startBtn.disabled  = true;
   messagesEl.innerHTML = "";
 }
