@@ -51,17 +51,11 @@
     .restart-btn:hover { color: #1C1C1A; }
     .mode-tag { font-size: 11px; font-weight: 400; color: #A09C96; background: #F0EDE8; border-radius: 999px; padding: 2px 8px; margin-left: 8px; vertical-align: middle; }
 
-    /* ── Stage bar (sparring mode) ── */
-    .stage-bar-wrap { background: #F0EDE8; border-radius: 10px; padding: 11px 14px; margin-bottom: 1.25rem; }
-    .stage-steps { display: flex; align-items: center; margin-bottom: 6px; }
-    .stage-step { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 0 0 auto; }
-    .stage-dot { width: 8px; height: 8px; border-radius: 50%; background: #D8D3CC; transition: background 0.5s ease; }
-    .stage-dot.active { background: #7A7570; }
-    .stage-dot.current { background: #1C1C1A; }
-    .stage-step-name { font-size: 10px; color: #B5B0A9; white-space: nowrap; transition: color 0.5s; }
-    .stage-step.is-current .stage-step-name { color: #5C5A56; font-weight: 500; }
-    .stage-connector { flex: 1; height: 1px; background: #D8D3CC; margin: 0 4px; margin-bottom: 14px; }
-    .stage-label { font-size: 11px; color: #7A7570; font-style: italic; }
+    /* ── Stage indicator (exploration mode) ── */
+    .stage-indicator { display: flex; align-items: center; gap: 8px; margin-bottom: 1.25rem; padding: 0 2px; }
+    .stage-pulse { width: 6px; height: 6px; border-radius: 50%; background: #1C1C1A; flex-shrink: 0; animation: stagePulse 2.4s ease-in-out infinite; }
+    @keyframes stagePulse { 0%,100%{opacity:0.25;transform:scale(0.75)} 50%{opacity:1;transform:scale(1)} }
+    #stage-label { font-size: 12px; color: #A09C96; font-style: italic; letter-spacing: 0.01em; transition: opacity 0.4s; }
 
     /* ── Clarity bar (teaching modes) ── */
     .clarity-bar-wrap { background: #F0EDE8; border-radius: 10px; padding: 9px 13px; margin-bottom: 1.25rem; }
@@ -157,30 +151,10 @@
       <button class="restart-btn" id="restart-btn">start over</button>
     </div>
 
-    <!-- Stage bar: sparring mode -->
-    <div id="stage-bar" class="stage-bar-wrap" style="display:none;">
-      <div class="stage-steps">
-        <div class="stage-step is-current">
-          <div class="stage-dot current"></div>
-          <span class="stage-step-name">Surface</span>
-        </div>
-        <div class="stage-connector"></div>
-        <div class="stage-step">
-          <div class="stage-dot"></div>
-          <span class="stage-step-name">Deepen</span>
-        </div>
-        <div class="stage-connector"></div>
-        <div class="stage-step">
-          <div class="stage-dot"></div>
-          <span class="stage-step-name">Connect</span>
-        </div>
-        <div class="stage-connector"></div>
-        <div class="stage-step">
-          <div class="stage-dot"></div>
-          <span class="stage-step-name">Insight</span>
-        </div>
-      </div>
-      <p class="stage-label" id="stage-label">Getting underneath it</p>
+    <!-- Stage indicator: exploration mode -->
+    <div id="stage-bar" class="stage-indicator" style="display:none;">
+      <span class="stage-pulse"></span>
+      <span id="stage-label">Exploring</span>
     </div>
 
     <!-- Clarity bar: teaching modes -->
